@@ -5,21 +5,19 @@ export async function signUp({ email, password, full_name }) {
     email,
     password,
     options: {
+      emailRedirectTo: `${window.location.origin}/dashboard.html`,
       data: { full_name }
     }
   });
   if (error) throw error;
-  // Create profile row
-  const userId = data.user?.id;
-  if (userId) {
-    await supabase.from('profiles').upsert({ id: userId, email, full_name, role: 'user' });
-  }
+  await ensureProfile();
   return data;
 }
 
 export async function signIn({ email, password }) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
+  try { await ensureProfile(); } catch (_) {}
   return data;
 }
 
@@ -39,7 +37,7 @@ export async function resetPassword(email) {
 export async function getProfile() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+  const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -56,6 +54,15 @@ export async function updateProfile({ full_name, avatar_url, email }) {
   const { data, error } = await supabase.from('profiles').upsert(updates).select().single();
   if (error) throw error;
   return data;
+}
+
+async function ensureProfile() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  const { data: existing } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle();
+  if (!existing) {
+    await supabase.from('profiles').insert({ id: user.id, email: user.email, full_name: user.user_metadata?.full_name || '', role: 'user' });
+  }
 }
 
 // Wire default forms if present

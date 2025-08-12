@@ -6,8 +6,7 @@ export const SUPABASE_PUBLIC_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ey
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLIC_ANON_KEY, {
   auth: {
     persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
+    detectSessionInUrl: true
   }
 });
 

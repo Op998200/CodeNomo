@@ -83,9 +83,8 @@
       tabSignup.onclick = () => { signupForm.classList.remove('hidden'); loginForm.classList.add('hidden'); resetForm.classList.add('hidden'); };
       showReset.onclick = () => { resetForm.classList.remove('hidden'); loginForm.classList.add('hidden'); signupForm.classList.add('hidden'); };
 
-      onAuthChanged((_session) => {
-        // If already logged in, go to dashboard
-        if (_session?.user) window.location.href = '/dashboard.html';
+      onAuthChanged((session) => {
+        if (session && session.user) window.location.href = '/dashboard.html';
       });
     }
   </script>
