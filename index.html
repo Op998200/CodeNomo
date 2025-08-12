@@ -1,1 +1,93 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cashivo — Sign In</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.supabase.co https://esm.sh https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://checkout.razorpay.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://esm.sh https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://checkout.razorpay.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://*; connect-src 'self' https://*.supabase.co https://api.razorpay.com; frame-src https://api.razorpay.com https://*.razorpay.com;" />
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-950" onload="init()">
+  <div class="min-h-full grid place-items-center p-6">
+    <div class="max-w-md w-full card p-6">
+      <h1 class="text-2xl font-semibold mb-4 text-center">Cashivo</h1>
+      <p class="text-center text-sm text-slate-500 mb-6">Track your income and expenses with ease.</p>
 
+      <div class="grid grid-cols-2 gap-2 mb-4">
+        <button id="tab-login" class="btn">Login</button>
+        <button id="tab-signup" class="btn-outline">Sign Up</button>
+      </div>
+
+      <form id="login-form" class="space-y-3">
+        <div>
+          <label class="label">Email</label>
+          <input name="email" type="email" required class="input" placeholder="you@example.com" />
+        </div>
+        <div>
+          <label class="label">Password</label>
+          <input name="password" type="password" required class="input" placeholder="••••••••" />
+        </div>
+        <button class="btn w-full" type="submit">Login</button>
+      </form>
+
+      <form id="signup-form" class="space-y-3 hidden mt-2">
+        <div>
+          <label class="label">Full name</label>
+          <input name="full_name" required class="input" placeholder="Your name" />
+        </div>
+        <div>
+          <label class="label">Email</label>
+          <input name="email" type="email" required class="input" placeholder="you@example.com" />
+        </div>
+        <div>
+          <label class="label">Password</label>
+          <input name="password" type="password" required class="input" placeholder="••••••••" />
+        </div>
+        <button class="btn w-full" type="submit">Create account</button>
+      </form>
+
+      <form id="reset-form" class="space-y-3 hidden mt-2">
+        <div>
+          <label class="label">Email</label>
+          <input name="email" type="email" required class="input" placeholder="you@example.com" />
+        </div>
+        <button class="btn w-full" type="submit">Send password reset</button>
+      </form>
+
+      <div class="text-center mt-4 text-sm">
+        <button id="show-reset" class="text-sky-600">Forgot password?</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { onAuthChanged, initTheme } from './js/supabase.js';
+    import { wireAuthForms } from './js/auth.js';
+    import { registerServiceWorker } from './js/offline.js';
+
+    window.init = () => {
+      initTheme();
+      wireAuthForms();
+      registerServiceWorker();
+
+      // tab toggling
+      const loginForm = document.getElementById('login-form');
+      const signupForm = document.getElementById('signup-form');
+      const resetForm = document.getElementById('reset-form');
+      const tabLogin = document.getElementById('tab-login');
+      const tabSignup = document.getElementById('tab-signup');
+      const showReset = document.getElementById('show-reset');
+
+      tabLogin.onclick = () => { loginForm.classList.remove('hidden'); signupForm.classList.add('hidden'); resetForm.classList.add('hidden'); };
+      tabSignup.onclick = () => { signupForm.classList.remove('hidden'); loginForm.classList.add('hidden'); resetForm.classList.add('hidden'); };
+      showReset.onclick = () => { resetForm.classList.remove('hidden'); loginForm.classList.add('hidden'); signupForm.classList.add('hidden'); };
+
+      onAuthChanged((_session) => {
+        // If already logged in, go to dashboard
+        if (_session?.user) window.location.href = '/dashboard.html';
+      });
+    }
+  </script>
+</body>
+</html>

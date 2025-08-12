@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom component classes (optional) */
+@layer components {
+  .card { @apply rounded-lg border p-4 bg-white dark:bg-slate-900 dark:border-slate-800; }
+  .input { @apply w-full rounded-md border px-3 py-2 dark:bg-slate-800 dark:border-slate-700; }
+  .label { @apply text-sm text-slate-600 dark:text-slate-300; }
+}
