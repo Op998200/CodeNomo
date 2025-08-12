@@ -1,0 +1,25 @@
+/* Custom styles for Cashivo */
+:root { color-scheme: light dark; }
+html { scroll-behavior: smooth; }
+
+/***** Dark mode helpers *****/
+.dark .card { background-color: #0b1220; }
+.card { background-color: #ffffff; border: 1px solid rgba(0,0,0,0.06); border-radius: 0.5rem; }
+
+.spinner { border: 3px solid rgba(0,0,0,0.1); border-left-color: #0ea5e9; height: 24px; width: 24px; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+input[type='date']::-webkit-calendar-picker-indicator { filter: invert(0.5); }
+
+/* Buttons (no Tailwind build; explicit CSS) */
+.btn { padding: 0.5rem 1rem; border-radius: 0.375rem; background-color: #0284c7; color: #fff; }
+.btn:hover { background-color: #0369a1; }
+.btn:disabled { opacity: 0.5; }
+.btn-outline { padding: 0.5rem 1rem; border-radius: 0.375rem; border: 1px solid #0284c7; color: #0284c7; background: transparent; }
+.btn-outline:hover { background-color: rgba(2,132,199,0.08); }
+
+/* Form controls */
+.input { width: 100%; border: 1px solid rgba(0,0,0,0.12); border-radius: 0.375rem; padding: 0.5rem 0.75rem; background: #fff; color: #0f172a; }
+.dark .input { background: #0f172a; color: #e2e8f0; border-color: #1f2937; }
+.label { font-size: 0.875rem; color: #475569; }
+.dark .label { color: #cbd5e1; }

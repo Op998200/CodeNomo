@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cashivo — Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-950" onload="init()">
+  <header class="border-b bg-white dark:bg-slate-900">
+    <div class="mx-auto max-w-6xl flex items-center justify-between p-4">
+      <a href="/dashboard.html" class="font-semibold">Cashivo</a>
+      <nav class="flex items-center gap-3 text-sm">
+        <a href="/dashboard.html" class="text-sky-600">Dashboard</a>
+        <button id="logout-btn" class="btn">Logout</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl p-4 space-y-6">
+    <section class="card p-4">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-semibold">Users</h2>
+        <div class="flex items-center gap-2">
+          <input id="user-search" class="input" placeholder="Search by email" />
+          <button id="export-all-csv" class="btn-outline">Export All CSV</button>
+        </div>
+      </div>
+      <table class="w-full text-left">
+        <thead>
+          <tr class="text-sm text-slate-600">
+            <th class="px-3 py-2">Name</th>
+            <th class="px-3 py-2">Email</th>
+            <th class="px-3 py-2">Role</th>
+            <th class="px-3 py-2">Status</th>
+            <th class="px-3 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="admin-users"></tbody>
+      </table>
+    </section>
+
+    <section class="card p-4">
+      <h2 class="text-lg font-semibold mb-2">Recent Transactions</h2>
+      <table class="w-full text-left">
+        <thead>
+          <tr class="text-sm text-slate-600">
+            <th class="px-3 py-2">ID</th>
+            <th class="px-3 py-2">Owner</th>
+            <th class="px-3 py-2">Title</th>
+            <th class="px-3 py-2">Type</th>
+            <th class="px-3 py-2">Amount</th>
+            <th class="px-3 py-2">Date</th>
+          </tr>
+        </thead>
+        <tbody id="admin-transactions"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initAdmin } from './js/admin.js';
+    import { initTheme } from './js/supabase.js';
+
+    window.init = async () => {
+      initTheme();
+      await initAdmin();
+    }
+  </script>
+</body>
+</html>

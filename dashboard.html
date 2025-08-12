@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cashivo — Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-950" onload="init()">
+  <header class="border-b bg-white dark:bg-slate-900">
+    <div class="mx-auto max-w-6xl flex items-center justify-between p-4">
+      <a href="/dashboard.html" class="font-semibold">Cashivo</a>
+      <nav class="flex items-center gap-3 text-sm">
+        <button id="theme-toggle" title="Toggle theme" class="btn-outline">🌓</button>
+        <a href="/add-transaction.html" class="text-sky-600">Add</a>
+        <a href="/payment.html" class="text-sky-600">Add Funds</a>
+        <a href="/profile.html" class="text-sky-600">Profile</a>
+        <a href="/admin.html" class="text-sky-600">Admin</a>
+        <button id="logout-btn" class="btn">Logout</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl p-4 space-y-6">
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="card p-4">
+        <div class="text-slate-500 text-sm">Total Income</div>
+        <div id="total-income" class="text-2xl font-semibold">₹0</div>
+      </div>
+      <div class="card p-4">
+        <div class="text-slate-500 text-sm">Total Expense</div>
+        <div id="total-expense" class="text-2xl font-semibold">₹0</div>
+      </div>
+      <div class="card p-4">
+        <div class="text-slate-500 text-sm">Balance</div>
+        <div id="balance" class="text-2xl font-semibold">₹0</div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="card p-4 md:col-span-2">
+        <canvas id="trendChart" height="120"></canvas>
+      </div>
+      <div class="card p-4">
+        <canvas id="categoryChart" height="120"></canvas>
+      </div>
+    </section>
+
+    <section class="card p-4 space-y-3">
+      <div class="flex flex-wrap gap-2 items-end">
+        <div>
+          <label class="label">From</label>
+          <input id="filter-from" type="date" class="input" />
+        </div>
+        <div>
+          <label class="label">To</label>
+          <input id="filter-to" type="date" class="input" />
+        </div>
+        <div>
+          <label class="label">Type</label>
+          <select id="filter-type" class="input">
+            <option value="">All</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+        <div class="flex-1">
+          <label class="label">Search</label>
+          <input id="filter-search" class="input" placeholder="Search title..." />
+        </div>
+        <button id="apply-filters" class="btn">Apply</button>
+        <button id="export-csv" class="btn-outline">Export CSV</button>
+      </div>
+
+      <div id="tx-list" class="divide-y"></div>
+      <button id="load-more" class="btn w-full">Load more</button>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script type="module">
+    import { requireAuth, toast, formatINR, initTheme, saveThemePreference } from './js/supabase.js';
+    import { wireAuthForms } from './js/auth.js';
+    import { fetchTransactions, computeSummary, renderTransactionRow, exportCsv, createTransaction } from './js/transactions.js';
+
+    let page = 0; let current = [];
+
+    async function load() {
+      const from = document.getElementById('filter-from').value || undefined;
+      const to = document.getElementById('filter-to').value || undefined;
+      const type = document.getElementById('filter-type').value || undefined;
+      const search = document.getElementById('filter-search').value || undefined;
+      const data = await fetchTransactions({ from, to, type, search, page });
+      current = current.concat(data);
+      const list = document.getElementById('tx-list');
+      list.insertAdjacentHTML('beforeend', data.map(renderTransactionRow).join(''));
+      if (data.length < 20) document.getElementById('load-more').classList.add('hidden');
+      await refreshSummary();
+      await refreshCharts();
+    }
+
+    async function refreshSummary() {
+      const from = document.getElementById('filter-from').value || undefined;
+      const to = document.getElementById('filter-to').value || undefined;
+      const s = await computeSummary({ from, to });
+      document.getElementById('total-income').textContent = formatINR(s.income);
+      document.getElementById('total-expense').textContent = formatINR(s.expense);
+      document.getElementById('balance').textContent = formatINR(s.balance);
+    }
+
+    let trendChart, categoryChart;
+    async function refreshCharts() {
+      const byMonth = {};
+      for (const t of current) {
+        const m = (t.date || '').slice(0,7);
+        if (!byMonth[m]) byMonth[m] = { income: 0, expense: 0 };
+        byMonth[m][t.type] += Number(t.amount);
+      }
+      const labels = Object.keys(byMonth).sort();
+      const incomeData = labels.map(l => byMonth[l].income);
+      const expenseData = labels.map(l => byMonth[l].expense);
+
+      const byCat = {};
+      for (const t of current) {
+        const c = t.category_name || t.category_id || 'Uncategorized';
+        byCat[c] = (byCat[c] || 0) + Number(t.amount) * (t.type === 'expense' ? 1 : 0);
+      }
+      const catLabels = Object.keys(byCat);
+      const catValues = Object.values(byCat);
+
+      const ctx1 = document.getElementById('trendChart');
+      const ctx2 = document.getElementById('categoryChart');
+      trendChart?.destroy(); categoryChart?.destroy();
+      trendChart = new Chart(ctx1, { type: 'line', data: { labels, datasets: [
+        { label: 'Income', data: incomeData, borderColor: '#16a34a' },
+        { label: 'Expense', data: expenseData, borderColor: '#dc2626' }
+      ]}});
+      categoryChart = new Chart(ctx2, { type: 'doughnut', data: { labels: catLabels, datasets: [{ data: catValues, backgroundColor: ['#0284c7','#22c55e','#ef4444','#f59e0b','#8b5cf6','#06b6d4'] }] }});
+    }
+
+    window.init = async () => {
+      initTheme();
+      await requireAuth('/index.html');
+      document.getElementById('theme-toggle').onclick = () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        saveThemePreference(isDark ? 'dark' : 'light');
+      };
+      document.getElementById('apply-filters').onclick = () => { page = 0; current = []; document.getElementById('tx-list').innerHTML=''; document.getElementById('load-more').classList.remove('hidden'); load(); };
+      document.getElementById('export-csv').onclick = () => exportCsv(current);
+      document.getElementById('load-more').onclick = () => { page++; load(); };
+      load();
+    }
+  </script>
+</body>
+</html>
