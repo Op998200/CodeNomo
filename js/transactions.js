@@ -17,10 +17,12 @@ export const AutoCategoryRules = [
 ];
 
 export async function listCategories() {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData?.user?.id || '00000000-0000-0000-0000-000000000000';
   const { data, error } = await supabase
     .from('categories')
     .select('*')
-    .or('owner_id.is.null,owner_id.eq.' + (await supabase.auth.getUser()).data.user.id)
+    .or(`owner_id.is.null,owner_id.eq.${userId}`)
     .order('name');
   if (error) throw error;
   return data;

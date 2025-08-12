@@ -144,6 +144,7 @@
     window.init = async () => {
       initTheme();
       await requireAuth('/index.html');
+      wireAuthForms();
       document.getElementById('theme-toggle').onclick = () => {
         const isDark = document.documentElement.classList.toggle('dark');
         saveThemePreference(isDark ? 'dark' : 'light');
