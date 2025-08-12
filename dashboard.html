@@ -82,9 +82,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script type="module">
-    import { requireAuth, toast, formatINR, initTheme, saveThemePreference } from './js/supabase.js';
-    import { wireAuthForms } from './js/auth.js';
-    import { fetchTransactions, computeSummary, renderTransactionRow, exportCsv, createTransaction } from './js/transactions.js';
+    import { requireAuth, toast, formatINR, initTheme, saveThemePreference } from './js/supabase.js?v=2';
+    import { wireAuthForms } from './js/auth.js?v=2';
+    import { fetchTransactions, computeSummary, renderTransactionRow, exportCsv, createTransaction } from './js/transactions.js?v=2';
 
     let page = 0; let current = [];
 

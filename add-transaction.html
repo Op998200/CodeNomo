@@ -69,9 +69,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
   <script type="module">
-    import { requireAuth, toast, initTheme } from './js/supabase.js';
-    import { listCategories, autoCategorize, createTransaction } from './js/transactions.js';
-    import { queueIfOffline, trySync } from './js/offline.js';
+    import { requireAuth, toast, initTheme } from './js/supabase.js?v=2';
+    import { listCategories, autoCategorize, createTransaction } from './js/transactions.js?v=2';
+    import { queueIfOffline, trySync } from './js/offline.js?v=2';
 
     window.init = async () => {
       initTheme();

@@ -40,9 +40,9 @@
   </main>
 
   <script type="module">
-    import { requireAuth, toast, initTheme } from './js/supabase.js';
-    import { getProfile, updateProfile } from './js/auth.js';
-    import { uploadImage } from './js/storage.js';
+    import { requireAuth, toast, initTheme } from './js/supabase.js?v=2';
+    import { getProfile, updateProfile } from './js/auth.js?v=2';
+    import { uploadImage } from './js/storage.js?v=2';
 
     window.init = async () => {
       initTheme();
